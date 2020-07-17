@@ -1,0 +1,70 @@
+<?php
+$_code = $this->getMethodCode();
+$pathurl = ((!empty($_SERVER["HTTPS"])) ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+$pathurl = explode("index.php", $pathurl);
+$pathurl = $pathurl[0];
+?>
+<ul class="form-list" id="payment_form_<?php echo $_code ?>" style="display:none">
+    <li>
+        <?php
+            $this->CreateSimpleWebpay();
+        ?>
+        <script>
+            var $ = null;
+            jQuery(document).ready(function ($$) {
+                $ = $$;
+                $("#checkout-payment-method-load input").change(function () {
+                    ChangeButtonAction($(this).val());
+                });
+
+                ChangeButtonAction($("#checkout-payment-method-load input").val());
+
+                $("#ResponseSimpleWebpay").change(function () {
+                    var Data = $(this).val();
+                    if (Data !== "Error") {
+                        Data = $.parseJSON(Data);
+                        if (Data.RecurringSaleTokenId !== null && Data.RecurringSaleTokenId !== "" && Data.RecurringSaleTokenId !== undefined)
+                            $("#CenposWebpaySimpleResult").html("");
+                        for (var indice in Data) {
+                            $("#CenposWebpaySimpleResult").append('<input type="hidden"  name="payment[webpay' + indice.toLowerCase() + ']" value="' + Data[indice] + '"/>')
+                          
+                        }
+                        $("#CenposWebpaySimpleResult").append('<input type="hidden"  name="payment[webpayistoken]" value="'+((Data.CardExpirationDateFix !== undefined) ? "token" : "notoken")+'"/>'); 
+                        $("#payment_form_simplewebpay_acc").hide();
+
+                        payment.save();//cenposGlobalParam.success(messageEvent.data["transaction"]);
+                    }
+                });
+                $("#opc-payment").click(function(){
+                    var isActive = $(this).hasClass("active");
+                    
+                    if(isActive){
+                        ChangeButtonAction($("#checkout-payment-method-load input").val());
+                    }
+                });
+            });
+            
+            function ChangeButtonAction(name) {
+                if ($("#buttongenerate").html() == undefined) {
+                    $("#payment-buttons-container").append($("#payment-buttons-container button").clone().removeAttr("onclick").attr("id", "buttongenerate"));
+                    $("#buttongenerate").click(function () {
+                        $("#SubmitToken")[0].click();
+                    });
+                }
+                if (name == "simplewebpay_acc") {
+                    $("#payment-buttons-container button").hide();
+                    $("#buttongenerate").show();
+                } else {
+                    $("#payment-buttons-container button").show();
+                    $("#buttongenerate").hide();
+                }
+            }
+            
+            
+            function TestAlert(){
+                alert("hola");
+            }
+        </script>
+        <div id="CenposWebpaySimpleResult"></div>
+    </li>
+</ul>

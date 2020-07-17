@@ -1,0 +1,11 @@
+<?php echo $this->escapeHtml($this->getMethod()->getTitle()) ?>
+<?php if ($_specificInfo = $this->getSpecificInformation()):?>
+
+<?php foreach ($_specificInfo as $_label => $_value):?>
+<br /><strong><?php echo $this->escapeHtml($_label)?>:</strong> <?php echo nl2br(implode($this->getValueAsArray($_value, true), "\n"))?>
+<?php endforeach; ?>
+<?php endif;?>
+<?php if ($this->isToken() === "notoken"): ?><br /><a id='SendTokenClick' style='display:block; cursor: pointer' onclick='SendToken("<?php echo Mage::getUrl('simplewebpay/processing/save') ?>", "<?php echo Mage::getUrl('image') ?>")'>Save card</a>
+<?php endif;?>
+<?php echo $this->getChildHtml()?>
+

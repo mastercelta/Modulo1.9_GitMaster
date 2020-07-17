@@ -1,0 +1,120 @@
+<b><?php echo Mage::helper('simplewebpay')->__('Loading secure payment page (SSL)'); ?></b>
+<form name="simplewebpay" id="simplewebpay_place_form" action="<?php echo $this->getFormAction();?>" method="GET">
+<?php $sessionDataPOST = ""; ?>
+<?php if (is_array($this->getFormData())): ?>
+    <?php foreach ($this->getFormData() as $name => $value): ?>
+        <?php 
+            if($name == "sessionDataPost"){
+                $sessionDataPOST = $value;
+            }else{ 
+        ?>
+            <input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
+        <?php } ?>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+</form>
+<script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+
+function isMobileSafari() {
+    return navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/)
+}
+ function IsThreePartyCookie() {
+    var isbrowser = navigator.userAgent.toLowerCase();
+    if(isbrowser.indexOf('chrome')  > -1) return false;
+
+    if (document.all) return true;
+    var params = ["safari", "msie 8","msie 9","msie 10", "rv:11"];
+    for(var n=0;n < params.length; n++){
+       if (isbrowser.indexOf(params[n])!=-1) return true;   
+    }
+    
+    return false;
+}
+ function setCookie(cookieName, cookieValue, nDays) {
+        var today = new Date();
+        var expire = new Date();
+        if (nDays == null || nDays == 0) nDays = 1;
+        expire.setTime(today.getTime() + 3600000 * 24 * nDays);
+        document.cookie = cookieName + "=" + escape(cookieValue)
+                                        + ";expires=" + expire.toGMTString();
+}
+	
+function readCookie (cookieName) {
+        var re = new RegExp('[; ]' + cookieName + '=([^\\s;]*)');
+        var sMatch = (' ' + document.cookie).match(re);
+        if (cookieName && sMatch) return unescape(sMatch[1]);
+        return '';
+}
+ function RedirectPage(){
+        debugger;
+        var hash = window.location.hash;
+         if(readCookie("cenpossimplewebpay") == "visitsimplewebpay") return true;
+
+         if (hash.toString().indexOf("visitsimplewebpay") == -1) {
+            var urlcurrent = document.URL;
+            urlcurrent = urlcurrent.replace("placeform", "payment");
+            urlcurrent = urlcurrent.replace("Placeform", "payment");
+            var urlfinal = '<?php echo $this->getFormAction();?>?type=redirectthree&urlreturn=' + encodeURIComponent( urlcurrent + "#visitsimplewebpay") ;
+            setCookie("cenpossimplewebpay", "visitsimplewebpay", 1);
+            window.open(urlfinal , '_top');
+        }
+        else{
+            return true;
+        }
+    }
+
+if (isMobileSafari()) RedirectPage();
+
+if (IsThreePartyCookie()) RedirectPage();
+        
+
+<?php if(!empty($sessionDataPOST)){ ?>
+jQuery(document).ready(function () {
+      $.ajax(
+      {
+        type: "POST",
+        url: "<?php echo $this->getFormAction();?>?app=genericcontroller&action=CreateSession",
+        data: "data=<?php echo $sessionDataPOST?>",
+        crossDomain: true,
+        dataType: 'jsonp',
+        beforeSend: function () {
+
+        },
+        success: function (msg) {
+            if (msg.Result != "0") {
+                alert("the session cant be create the validation fails");
+                var paymentform = document.getElementById('simplewebpay_place_form');
+                    window.onload = paymentform.submit();
+            } else {
+                if(msg.SessionId != ""){
+                    var urlcustom = "<?php echo $this->getFormAction();?>"
+                    var urlcustomdefa = urlcustom.indexOf("default.aspx");
+
+                    if(urlcustomdefa > 0){
+                      var tempcustom = urlcustom.split("default.aspx");
+                      if(tempcustom.length > 0 ) urlcustom  = tempcustom[0];
+                    }
+                    var slash = urlcustom.substring(urlcustom.length - 1);
+
+                    var urlfinal2 = urlcustom + ((slash == "/") ? "" : "/") + "(S("+msg.SessionId+"))/";
+                    
+                    $("#simplewebpay_place_form").attr("action",urlfinal2);
+                    
+                    var paymentform = document.getElementById('simplewebpay_place_form');
+                    window.onload = paymentform.submit();
+                }
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+        }
+    });
+ });
+ <?php }else{ ?>
+     var paymentform = document.getElementById('simplewebpay_place_form');
+                    window.onload = paymentform.submit();
+ <?php } ?>
+//]]>
+</script>

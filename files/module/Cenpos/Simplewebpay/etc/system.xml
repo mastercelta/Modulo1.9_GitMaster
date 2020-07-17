@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <payment>
+            <groups>
+                <simplewebpay_acc translate="label" module="simplewebpay">
+                    <label>CenPOS Module Credit / Debit Card</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>201</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <config_path>payment/simplewebpay_acc/active</config_path>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </active>
+                        <userID translate="label">
+                            <label>UserID</label>
+                            <frontend_type>text</frontend_type>
+                            <config_path>payment/simplewebpay_acc/userID</config_path>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </userID>
+                        <password translate="label">
+                            <label>Password</label>
+                            <frontend_type>password</frontend_type>
+                            <config_path>payment/simplewebpay_acc/password</config_path>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </password>
+                        <merchantID translate="label">
+                            <label>MerchantID</label>
+                            <frontend_type>text</frontend_type>
+                            <config_path>payment/simplewebpay_acc/merchant</config_path>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </merchantID>
+                        <secretkey translate="label">
+                            <label>Secret Key</label>
+                            <frontend_type>text</frontend_type>
+                            <config_path>payment/simplewebpay_acc/secretkey</config_path>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </secretkey>
+                        <urlsimplewebpay translate="label">
+                            <label>Url</label>
+                            <frontend_type>text</frontend_type>
+                            <config_path>payment/simplewebpay_acc/urlsimplewebpay</config_path>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </urlsimplewebpay>
+                        <isCVV translate="label">
+                            <label>Enabled CVV</label>
+                            <frontend_type>select</frontend_type>
+                            <config_path>payment/simplewebpay_acc/iscvv</config_path>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </isCVV>
+                        <payment_action translate="label">
+                            <label>Payment Action</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>paygate/authorizenet_source_paymentAction</source_model>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                         </payment_action>
+                         <onlyform translate="label">
+                            <label>Use Tokens</label>
+                            <frontend_type>select</frontend_type>
+                            <config_path>payment/simplewebpay_acc/onlyform</config_path>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </onlyform>
+                    </fields>
+                </simplewebpay_acc>
+            </groups>
+        </payment>
+    </sections>
+</config>

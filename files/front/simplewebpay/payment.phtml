@@ -1,0 +1,16 @@
+<div class="page-head">
+    <h3><?php echo Mage::helper('simplewebpay')->__('Please pay your order') ?></h3>
+</div>
+<script>
+</script>
+<table style="width:100%;">
+    <tr>
+        <td style="width:75%">
+            <iframe width="100%" onload="RedirectSuccessCardinal(this)" height="400px" name="Secure3d" style="border:none !important;" style="width:100%; height:600px;" src=""></iframe>
+        </td>
+    </tr>
+</table>
+<script>
+    CardinalVO = '<?php echo $this->getData3D(); ?>';
+    Activate3dSecure = true;
+</script>
