@@ -19,6 +19,7 @@ class install
 			$this->rcopy("files/front/simplewebpay.xml","../app/design/frontend/base/default/layout/simplewebpay.xml");
 			$this->rcopy("files/front/simplewebpay","../app/design/frontend/base/default/template/simplewebpay");
 			$this->rcopy("files/front/js/simplewebpay.js","../js/simplewebpay.js");
+			$this->rcopy("files/front/js/viewprocess.js","../js/viewprocess.js");
 			$this->rcopy("files/Cenpos_Simplewebpay.xml","../app/etc/modules/Cenpos_Simplewebpay.xml");
                         $this->rcopy("files/simplewebpay","../skin/frontend/base/default/images/simplewebpay");
                         $this->rcopy("files/cenpossimplewebpay.php","../cenpossimplewebpay.php");
@@ -30,6 +31,7 @@ class install
 			$this->rrmdir("../app/design/adminhtml/default/default/layout/simplewebpay.xml");
 			$this->rrmdir("../app/design/frontend/base/default/layout/simplewebpay.xml");
 			$this->rrmdir("../js/simplewebpay.js");
+			$this->rrmdir("../js/viewprocess.js");
 			$this->rrmdir("../app/design/frontend/base/default/template/simplewebpay");
 			$this->rrmdir("../app/etc/modules/Cenpos_Simplewebpay.xml");
                         $this->rrmdir("../skin/frontend/base/default/images/simplewebpay");

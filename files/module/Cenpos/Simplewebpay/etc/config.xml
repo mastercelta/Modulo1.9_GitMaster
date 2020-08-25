@@ -134,14 +134,15 @@
                 <model>simplewebpay/acc</model>
                 <payment_action>authorize_capture</payment_action>
                 <title>Credit / Debit Card</title>
-                <userID></userID>
-                <password></password>
                 <merchantID></merchantID>
                 <secretkey></secretkey>
                 <urlsimplewebpay></urlsimplewebpay>
+                <urlviewprocess></urlviewprocess>
                 <isCVV></isCVV>
                 <typesimplewebpay></typesimplewebpay>
-                <onlyform>false</onlyform>
+                <onlyform>0</onlyform>
+                <recaptcha>1</recaptcha>
+                <recaptchaversion>v3</recaptchaversion>
             </simplewebpay_acc>
         </payment>
     </default>

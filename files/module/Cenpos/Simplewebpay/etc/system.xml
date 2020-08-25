@@ -21,26 +21,8 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </active>
-                        <userID translate="label">
-                            <label>UserID</label>
-                            <frontend_type>text</frontend_type>
-                            <config_path>payment/simplewebpay_acc/userID</config_path>
-                            <sort_order>2</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </userID>
-                        <password translate="label">
-                            <label>Password</label>
-                            <frontend_type>password</frontend_type>
-                            <config_path>payment/simplewebpay_acc/password</config_path>
-                            <sort_order>3</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </password>
                         <merchantID translate="label">
-                            <label>MerchantID</label>
+                            <label>Merchant Encrypted</label>
                             <frontend_type>text</frontend_type>
                             <config_path>payment/simplewebpay_acc/merchant</config_path>
                             <sort_order>4</sort_order>
@@ -58,7 +40,7 @@
                             <show_in_store>1</show_in_store>
                         </secretkey>
                         <urlsimplewebpay translate="label">
-                            <label>Url</label>
+                            <label>Url Simple Webpay</label>
                             <frontend_type>text</frontend_type>
                             <config_path>payment/simplewebpay_acc/urlsimplewebpay</config_path>
                             <sort_order>6</sort_order>
@@ -66,12 +48,21 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </urlsimplewebpay>
+                         <urlviewprocess translate="label">
+                            <label>Url View Process</label>
+                            <frontend_type>text</frontend_type>
+                            <config_path>payment/simplewebpay_acc/urlviewprocess</config_path>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </urlviewprocess>
                         <isCVV translate="label">
                             <label>Enabled CVV</label>
                             <frontend_type>select</frontend_type>
                             <config_path>payment/simplewebpay_acc/iscvv</config_path>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>7</sort_order>
+                            <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -80,7 +71,7 @@
                             <label>Payment Action</label>
                             <frontend_type>select</frontend_type>
                             <source_model>paygate/authorizenet_source_paymentAction</source_model>
-                            <sort_order>8</sort_order>
+                            <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -89,12 +80,32 @@
                             <label>Use Tokens</label>
                             <frontend_type>select</frontend_type>
                             <config_path>payment/simplewebpay_acc/onlyform</config_path>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>9</sort_order>
+                            <source_model>simplewebpay/system_config_source_tokenoption</source_model>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </onlyform>
+                        <recaptcha translate="label">
+                            <label>Enable Recaptcha Google</label>
+                            <frontend_type>select</frontend_type>
+                            <config_path>payment/simplewebpay_acc/recaptcha</config_path>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </recaptcha>
+                        <recaptchaversion translate="label">
+                            <label>Version Recaptcha Google</label>
+                            <frontend_type>select</frontend_type>
+                            <config_path>payment/simplewebpay_acc/recaptchaversion</config_path>
+                            <source_model>simplewebpay/system_config_source_recaptchaoption</source_model>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </recaptchaversion>
                     </fields>
                 </simplewebpay_acc>
             </groups>

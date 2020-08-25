@@ -20,4 +20,28 @@
             </action>
         </reference>
     </checkout_onepage_index>
+    <customer_account>
+        <!-- Mage_Review -->
+        <reference name="customer_account_navigation">
+            <action method="addLink" translate="label" module="simplewebpay"><name>simplewebpay</name><path>simplewebpay/customer</path><label>Stored Credit Cards</label></action>
+        </reference>
+    </customer_account>
+
+    <!--controller action-->
+    <simplewebpay_customer_index translate="label">
+        <label>Customer Stored Credit Card</label>
+        <update handle="customer_account"/>
+        <reference name="head">
+            <action method="addJs">
+                <script>viewprocess.js</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate"><template>page/2columns-left.phtml</template></action>
+        </reference>
+        <reference name="my.account.wrapper">
+           <block type="simplewebpay/customer" name="simplewebpay_customer" template="simplewebpay/customer/token.phtml"/>
+        </reference>
+    </simplewebpay_customer_index>
+
 </layout>

@@ -93,19 +93,142 @@ class Cenpos_Simplewebpay_Helper_Data extends Mage_Payment_Helper_Data
      * @param array $params
      * @return array
      */
-    public function checkSecretRequest(Array $params)
+    public function getSecretRequest(Object $params, $captcha = null)
     {
-        $response = null;
+        $response = new stdClass();
         try {
-            $response = $this->_getHttpsPage($this->_simplewebpayServer . $this->_checkSecretUrl, array(
-                'email'   => $params['email'],
-                'secret'  => md5(md5($params['secret']) . $this->_simplewebpayMasterSecretHash),
-                'cust_id' => $this->_simplewebpayMasterCustId)
-            );
+
+            $params->IsCaptcha = ((Mage::getStoreConfig("payment/simplewebpay_acc/recaptcha") == "1") ? "true" : "false");
+
+            $params->Url = Mage::getStoreConfig("payment/simplewebpay_acc/urlsimplewebpay");
+            $params->Merchant = Mage::getStoreConfig("payment/simplewebpay_acc/merchant");
+            $params->SecretKey = Mage::getStoreConfig("payment/simplewebpay_acc/secretkey");
+            $params->CaptchaVersion = Mage::getStoreConfig("payment/simplewebpay_acc/recaptchaversion");
+
+            if(!isset($params->SecretKey) || empty($params->SecretKey))  throw new Exception("No Key Configured..");
+            if(!isset($params->Url) || empty($params->Url))  throw new Exception("No Url Configured..");
+            if(!isset($params->Merchant) || empty($params->Merchant))  throw new Exception("No Merchant Key Configured..");
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $params->Url = str_replace("default.aspx", "", $params->Url);
+            if(substr($params->Url, -1) != "/") $params->Url = $params->Url ."/";
+
+            if(isset($captcha) && $captcha) $captcha = true;
+
+            $postSend = "";
+            $postSend = "secretkey=".urlencode($params->SecretKey);
+            $postSend .= "&merchant=".urlencode($params->Merchant);
+            if(isset($params->Amount) && !empty($params->Amount)) $postSend .= "&amount=".$params->Amount;
+            if(isset($params->City) && !empty($params->City))$postSend .= "&city=FL".$params->Amount;
+            if(isset($params->CustomerBillingAddress) && !empty($params->CustomerBillingAddress)) $postSend .= "&address=".$params->CustomerBillingAddress;
+            if(isset($params->CustomerZipCode) && !empty($params->CustomerZipCode)) $postSend .= "&zipcode=".$params->CustomerZipCode;
+            if(isset($params->CustomerCode) && !empty($params->CustomerCode)) $postSend .= "&customercode=".$params->CustomerCode;
+            if(isset($params->Email) && !empty($params->Email))$postSend .= "&email=".$params->Email;
+            if(isset($params->InvoiceNumber) && !empty($params->InvoiceNumber)) $postSend .= "&invoicenumber=".$params->InvoiceNumber;
+            if(isset($params->TaxAmount) && !empty($params->TaxAmount)) $postSend .= "&taxamount=".$params->TaxAmount;
+            if(isset($params->Type) && !empty($params->Type)) $postSend .= "&type=".$params->Type;
+            if(isset($params->ReferenceNumber) && !empty($params->ReferenceNumber)) $postSend .= "&referencenumber=".$params->ReferenceNumber;
+            if(isset($params->GeoLocationInformation) && !empty($params->GeoLocationInformation)) $postSend .= "&ip=".$params->GeoLocationInformation;
+            if(isset($params->IsCaptcha) && !empty($params->IsCaptcha))  $postSend .= "&isrecaptcha=".$params->IsCaptcha; 
+            if(isset($params->CaptchaVersion) && !empty($params->CaptchaVersion))  $postSend .= "&recaptchaversion=".$params->CaptchaVersion; 
+            if(isset($params->TokenId) && !empty($params->TokenId))  $postSend .= "&tokenid=".$params->TokenId; 
+          
+            $ch = curl_init($params->Url."?app=genericcontroller&action=siteVerify");
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt ($ch, CURLOPT_POST, 1);
+            curl_setopt ($ch, CURLOPT_POSTFIELDS, $postSend);
+            curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+
+            
+            $resconn = curl_exec($ch);
+            $error = curl_errno($ch);
+            curl_close ($ch);
+            if(!empty($error)) { 
+                throw new Exception($error);
+            };
+            $error2 = curl_error($ch);
+            if(!empty($error2)) { 
+                throw new Exception($error2);
+            };
+            
+            $response = json_decode($resconn);
+
+            if($response->Result != 0) throw new Exception($response->Message);
+        } catch (Exception $e) {
+
+          //  return $e->getMessage();
+            $response->Message = $e->getMessage();
+            $response->Result = -1;
+            Mage::log($e->getMessage());
+        }
+
+        return $response;
+    }
+
+ /**
+     * Check if entered secret is valid
+     * @param array $params
+     * @return array
+     */
+    public function sendActionApi(string $command, string  $verifying, Object $params)
+    {
+        $response = new stdClass();
+        try {
+
+
+            $params->IsCaptcha = ((Mage::getStoreConfig("payment/simplewebpay_acc/recaptcha") == "1") ? "true" : "false");
+            $params->Url = Mage::getStoreConfig("payment/simplewebpay_acc/urlsimplewebpay");
+            $params->Merchant = Mage::getStoreConfig("payment/simplewebpay_acc/merchant");
+            $params->SecretKey = Mage::getStoreConfig("payment/simplewebpay_acc/secretkey");
+
+            if(!isset($params->SecretKey) || empty($params->SecretKey))  throw new Exception("No Key Configured..");
+            if(!isset($params->Url) || empty($params->Url))  throw new Exception("No Url Configured..");
+            if(!isset($params->Merchant) || empty($params->Merchant))  throw new Exception("No Merchant Key Configured..");
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $postSend = "";
+            $postSend = "verifyingpost=".urlencode($verifying);
+
+        
+            if(isset($params->Amount) && !empty($params->Amount)) $postSend .= "&amount=".$params->Amount;
+            if(isset($params->City) && !empty($params->City))$postSend .= "&city=FL".$params->Amount;
+            if(isset($params->CustomerBillingAddress) && !empty($params->CustomerBillingAddress)) $postSend .= "&address=".$params->CustomerBillingAddress;
+            if(isset($params->CustomerZipCode) && !empty($params->CustomerZipCode)) $postSend .= "&zipcode=".$params->CustomerZipCode;
+            if(isset($params->CustomerCode) && !empty($params->CustomerCode)) $postSend .= "&customercode=".$params->CustomerCode;
+            if(isset($params->Email) && !empty($params->Email))$postSend .= "&email=".$params->Email;
+            if(isset($params->InvoiceNumber) && !empty($params->InvoiceNumber)) $postSend .= "&invoicenumber=".$params->InvoiceNumber;
+            if(isset($params->InvoiceDetail) && !empty($params->InvoiceDetail)) $postSend .= "&invoicedetail=".urlencode(base64_encode($params->InvoiceDetail));
+            if(isset($params->TaxAmount) && !empty($params->TaxAmount)) $postSend .= "&taxamount=".$params->TaxAmount;
+            if(isset($params->Type) && !empty($params->Type)) $postSend .= "&type=".$params->Type;
+            if(isset($params->ReferenceNumber) && !empty($params->ReferenceNumber)) $postSend .= "&referencenumber=".$params->ReferenceNumber;
+            if(isset($params->GeoLocationInformation) && !empty($params->GeoLocationInformation)) $postSend .= "&ip=".urlencode($params->GeoLocationInformation.$ip);
+            if(isset($params->TokenId) && !empty($params->TokenId))  $postSend .= "&tokenid=".urlencode($params->TokenId); 
+
+            $ch = curl_init($params->Url."/api/".$command."/");
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt ($ch, CURLOPT_POST, 1);
+
+
+            curl_setopt ($ch, CURLOPT_POSTFIELDS, $postSend);
+            curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+            $resconn = curl_exec($ch);
+            $error = curl_errno($ch);
+
+            curl_close ($ch);
+            
+            if(!empty($error)) { 
+                throw new Exception($error);
+            };
+
+            $ResponseEncrypted = json_decode($resconn);
+            if($ResponseEncrypted->Result != 0) throw new Exception($ResponseEncrypted->Message);
+            $response  = $ResponseEncrypted;
         } catch (Exception $e) {
             Mage::log($e->getMessage());
-            return null;
+            $response->Message = $e->getMessage();
+            $response->Result = -1;
         }
+
         return $response;
     }
 

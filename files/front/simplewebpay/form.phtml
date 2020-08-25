@@ -6,52 +6,98 @@ $pathurl = $pathurl[0];
 ?>
 <ul class="form-list" id="payment_form_<?php echo $_code ?>" style="display:none">
     <li>
-        <?php
-            $this->CreateSimpleWebpay();
-        ?>
+        <style>
+            .displaynone {
+                display: none;
+            }
+        </style>
         <script>
-            var $ = null;
-            jQuery(document).ready(function ($$) {
-                $ = $$;
-                $("#checkout-payment-method-load input").change(function () {
-                    ChangeButtonAction($(this).val());
-                });
-
-                ChangeButtonAction($("#checkout-payment-method-load input").val());
-
-                $("#ResponseSimpleWebpay").change(function () {
-                    var Data = $(this).val();
-                    if (Data !== "Error") {
-                        Data = $.parseJSON(Data);
-                        if (Data.RecurringSaleTokenId !== null && Data.RecurringSaleTokenId !== "" && Data.RecurringSaleTokenId !== undefined)
-                            $("#CenposWebpaySimpleResult").html("");
-                        for (var indice in Data) {
-                            $("#CenposWebpaySimpleResult").append('<input type="hidden"  name="payment[webpay' + indice.toLowerCase() + ']" value="' + Data[indice] + '"/>')
-                          
-                        }
-                        $("#CenposWebpaySimpleResult").append('<input type="hidden"  name="payment[webpayistoken]" value="'+((Data.CardExpirationDateFix !== undefined) ? "token" : "notoken")+'"/>'); 
-                        $("#payment_form_simplewebpay_acc").hide();
-
-                        payment.save();//cenposGlobalParam.success(messageEvent.data["transaction"]);
+            jQuery.noConflict();
+            var onetime = true
+            jQuery(document).ready(function($) {
+                var windowsProxyCenpos = null;
+                var verifyingpost = '<?php echo $this->_getSessionSwp(); ?>';
+                verifyingpost = (verifyingpost != "" && verifyingpost != null) ? JSON.parse(verifyingpost) : { Result: -1, Message: "Empty Request Verifying"}
+                if (verifyingpost.Result != 0) {
+                    console.log(verifyingpost.Message);
+                    $("#NewCenposPlugin").html("<span>There is an error creating the session for the payment method, please reload the page</span>")
+                } else {
+                    var params = "verifyingpost=" + verifyingpost.Data;
+                    var heightsize = 320;
+                    if ("<?php echo $this->_getCvvOption() ?>" == "true") {
+                        heightsize = 340;
+                        params += "&iscvv=true";
                     }
+                    params += "&isemail=true";
+                    params += "&onlyform="+'<?php echo $this->_getTokenOption() ?>';
+                                    
+                    $("#MessageErrorResponse").html("");
+                    $("#NewCenposPlugin").html("<div></div>");
+                    $("#NewCenposPlugin > div").createWebpay({
+                        url: '<?php echo $this->_getUrl() ?>',
+                        params: params,
+                        width: '100%',
+                        height: heightsize,
+                        sessionToken: true,
+                        success: function(msg) {
+                            if(onetime){
+                                var Data = (typeof msg === "string") ? $.parseJSON(msg) : msg;
+                                if (Data.RecurringSaleTokenId !== null && Data.RecurringSaleTokenId !== "" && Data.RecurringSaleTokenId !== undefined)
+                                    $("#CenposWebpaySimpleResult").html("");
+                                for (var indice in Data) {
+                                    $("#CenposWebpaySimpleResult").append('<input type="hidden"  name="payment[webpay' + indice.toLowerCase() + ']" value="' + Data[indice] + '"/>');
+                                }
+                                $("#CenposWebpaySimpleResult").append('<input type="hidden"  name="payment[webpayistoken]" value="' + ((Data.CardExpirationDateFix !== undefined) ? "token" : "notoken") + '"/>');
+                                $("#payment_form_simplewebpay_acc").hide();
+
+                                onetime = false;
+                                payment.save(); //cenposGlobalParam.success(messageEvent.data["transaction"]);
+                            }
+                        },
+                        cancel: function(msg) {
+                            if(onetime){
+                                errorCustom(msg.Message);
+                                onetime = false;
+                            }
+                        }
+                    });
+                }
+                $("#checkout-payment-method-load input[type=radio]").change(function() {
+                    ChangeButtonAction();
                 });
-                $("#opc-payment").click(function(){
+
+                ChangeButtonAction();
+
+                $("#opc-payment").click(function() {
                     var isActive = $(this).hasClass("active");
-                    
-                    if(isActive){
-                        ChangeButtonAction($("#checkout-payment-method-load input").val());
+
+                    if (isActive) {
+                        ChangeButtonAction();
                     }
                 });
             });
-            
-            function ChangeButtonAction(name) {
+
+            function isDefined(variable) {
+                if (typeof(window[variable]) != "undefined") return true;
+                if (typeof(variable) == "function") return true;
+                return false;
+            }
+
+            function errorCustom(errormessage) {
+                var $ = jQuery;
+                $("#MessageErrorResponse").append('<ul class="messages"><li class="error-msg"><ul><li><span>' + errormessage + '</span></li></ul></li></ul>');
+            }
+
+            function ChangeButtonAction() {
+                var $ = jQuery;
                 if ($("#buttongenerate").html() == undefined) {
                     $("#payment-buttons-container").append($("#payment-buttons-container button").clone().removeAttr("onclick").attr("id", "buttongenerate"));
-                    $("#buttongenerate").click(function () {
-                        $("#SubmitToken")[0].click();
+                    $("#buttongenerate").click(function() {
+                        onetime = true;
+                        $("#NewCenposPlugin").submitAction();
                     });
                 }
-                if (name == "simplewebpay_acc") {
+                if ($("#checkout-payment-method-load input[type=radio]:checked").val()   == "simplewebpay_acc") {
                     $("#payment-buttons-container button").hide();
                     $("#buttongenerate").show();
                 } else {
@@ -59,12 +105,9 @@ $pathurl = $pathurl[0];
                     $("#buttongenerate").hide();
                 }
             }
-            
-            
-            function TestAlert(){
-                alert("hola");
-            }
         </script>
+        <div id="MessageErrorResponse"></div>
         <div id="CenposWebpaySimpleResult"></div>
+        <div id='NewCenposPlugin'></div>
     </li>
 </ul>

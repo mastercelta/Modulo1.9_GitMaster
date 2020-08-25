@@ -18,7 +18,7 @@
  * @copyright   Copyright (c) 2011 Cenpos Medien GmbH & Co. KG (http://www.phoenix-medien.de)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Cenpos_Simplewebpay_Block_Form extends Mage_Payment_Block_Form
+class Cenpos_Simplewebpay_Block_Customer extends Mage_Customer_Block_Account_Dashboard
 {
 
     /**
@@ -41,33 +41,12 @@ class Cenpos_Simplewebpay_Block_Form extends Mage_Payment_Block_Form
     protected function _construct()
     {
         parent::_construct();
-        $this->setTemplate('simplewebpay/form.phtml');
     }
 
-    protected function _getCheckout()
-    {
-        return Mage::getSingleton('checkout/session');
-    }
 
-    /**
-     * Return info URL for eWallet payment
-     *
-     * @return string
-     */
-    protected function _getOrder()
+    public function _getUrlViewProcess()
     {
-        if ($this->getOrder()) {
-            return $this->getOrder();
-        } elseif ($orderIncrementId = $this->_getCheckout()->getLastRealOrderId()) {
-            return Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
-        } else {
-            return null;
-        }
-    }
-
-    public function _getUrl()
-    {
-        return Mage::getStoreConfig("payment/simplewebpay_acc/urlsimplewebpay"); //https://www.cenpos.net/simplewebpay-ebpp-new/simplewebpay-new/paymentweb.aspx';
+        return Mage::getStoreConfig("payment/simplewebpay_acc/urlviewprocess"); //https://www.cenpos.net/simplewebpay-ebpp-new/simplewebpay-new/paymentweb.aspx';
     }
 
     public function _getCvvOption()
@@ -75,15 +54,11 @@ class Cenpos_Simplewebpay_Block_Form extends Mage_Payment_Block_Form
         return ((Mage::getStoreConfig("payment/simplewebpay_acc/iscvv") == "1") ? "true" : "false"); //https://www.cenpos.net/simplewebpay-ebpp-new/simplewebpay-new/paymentweb.aspx';
     }
 
-    public function _getTokenOption()
+    public function _getUrlSession()
     {
-        return ((Mage::getStoreConfig("payment/simplewebpay_acc/onlyform") == "0") ? "true" : "false"); //https://www.cenpos.net/simplewebpay-ebpp-new/simplewebpay-new/paymentweb.aspx';
+        return Mage::getUrl('simplewebpay/customer/session');
     }
-    public function _getTokenOption19()
-    {
-        return ((Mage::getStoreConfig("payment/simplewebpay_acc/onlyform") == "token19") ? "createtoken19" : ""); //https://www.cenpos.net/simplewebpay-ebpp-new/simplewebpay-new/paymentweb.aspx';
-    }
-    
+  
     protected function _getHelper()
     {
         return Mage::helper('simplewebpay');
@@ -94,25 +69,24 @@ class Cenpos_Simplewebpay_Block_Form extends Mage_Payment_Block_Form
         try{
             $checkout = Mage::getSingleton('checkout/session')->getQuote();
             $helper = $this->_getHelper();
-            $billAddress = $checkout->getBillingAddress();
-            $customer = $billAddress->getData();
-
-            $Street = $customer["street"];
-            if (strpos($Street, "\n") !== FALSE) {
-                $Street = str_replace("\n", " ", $Street);
-            }
+         
             $Request = new stdClass();
-            $Request->Email = $customer["email"];
-            $Request->CustomerBillingAddress = urlencode($Street);
             if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-                $customerData = Mage::getSingleton('customer/session')->getCustomer();
-                $Request->CustomerCode = $customerData->getId();
-            }
-            $Request->Type =  $this->_getTokenOption19();
-            $Request->CustomerZipCode = $customer["postcode"];
+                $customer = Mage::getSingleton('customer/session')->getCustomer();
+                $Request->CustomerCode = $customer->getId();
+                $customerData = $customer->getData(); 
+                $addressData = $customer->getDefaultShippingAddress()->getData();
+                $Street = $addressData["street"];
+                if (strpos($Street, "\n") !== FALSE) {
+                    $Street = str_replace("\n", " ", $Street);
+                }
+                if(isset($customerData["email"]) && !empty($customerData["email"])) $Request->Email = $customerData["email"];
+                if(isset($Street) && !empty($Street)) $Request->CustomerBillingAddress = urlencode($Street);
+                if(isset($addressData["postcode"]) && !empty($addressData["postcode"])) $Request->CustomerZipCode = $addressData["postcode"];
+            }else throw new Exception("Access Denied!!! You dont have permission to access..");
             
            
-            $Response = $helper->getSecretRequest($Request);
+            $Response = $helper->getSecretRequest($Request, true);
             
             return json_encode($Response);
         } catch (Exception $e) {
@@ -122,7 +96,5 @@ class Cenpos_Simplewebpay_Block_Form extends Mage_Payment_Block_Form
             $Response->Result = -1;
             return json_encode($Response);
         }
-        
-      
     }
 }

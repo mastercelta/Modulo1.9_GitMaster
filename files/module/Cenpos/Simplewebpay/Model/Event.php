@@ -255,12 +255,7 @@ class Cenpos_Simplewebpay_Model_Event
         $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE);
         $invoice->setCanVoidFlag(1);
        
-        
-        print_r(get_class_methods($invoice));
-        print_r(get_class($invoice));
-        print_r($invoice->canVoid());
-        die();
-         $invoice->register();
+        $invoice->register();
         $transactionSave = Mage::getModel('core/resource_transaction')
         ->addObject($invoice)
         ->addObject($invoice->getOrder());

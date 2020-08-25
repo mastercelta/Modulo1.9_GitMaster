@@ -152,7 +152,10 @@ class Cenpos_Simplewebpay_ProcessingController extends Mage_Core_Controller_Fron
             parent::_redirect('checkout/cart');
         }
     }
-
+    protected function _getHelper()
+    {
+        return Mage::helper('simplewebpay');
+    }
     public function saveAction() {
 
         $order = Mage::getSingleton('checkout/session')->getQuote();
@@ -174,47 +177,40 @@ class Cenpos_Simplewebpay_ProcessingController extends Mage_Core_Controller_Fron
             $email = "";
 
             $billing = $order->getBillingAddress();
-            if ($order->getBillingAddress()->getEmail()) {
-                $email = $order->getBillingAddress()->getEmail();
+            if ($billing->getEmail()) {
+                $email = $billing->getEmail();
             } else {
                 $email = $order->getCustomerEmail();
             }
 
             $payment = $order->getPayment();
 
-            require_once('app/code/local/Cenpos/Simplewebpay/Model/CenposConnector/Model/ModelConnector.php');
-            require_once('app/code/local/Cenpos/Simplewebpay/Model/CenposConnector/CenposConnector.php');
+            $helper = $this->_getHelper();
+            
+            $request = new stdClass();
 
-            CenposConnector::Init();
-
-            $Cenpos = new CenposConnector();
-
-            $ResultAbi = -1;
-
-            $request = new ConvertToPermanentTokenRequest();
-
-            $request->MerchantId = Mage::getStoreConfig("payment/simplewebpay_acc/merchant");
-            $request->Password = Mage::getStoreConfig("payment/simplewebpay_acc/password");
-            $request->UserId = Mage::getStoreConfig("payment/simplewebpay_acc/userID");
-            $request->Token = $payment->getWebpayrecurringsaletokenid();
+            $request->TokenId = $payment->getWebpayrecurringsaletokenid();
+            $request->Email =  $email;
             if (Mage::getSingleton('customer/session')->isLoggedIn()) {
                 $customerData = Mage::getSingleton('customer/session')->getCustomer();
                 $request->CustomerCode = $customerData->getId();
             };
 
-            $order2 = Mage::getModel('sales/order');
+            $Response = $helper->getSecretRequest($request);
+            
+            if( $Response->Result != 0 )  echo json_encode($Response);
+            else{
+                $responseToken = $helper->sendActionApi("ConvertCrypto", $Response->Data, $request);
 
-
-            $responseToken = $Cenpos->ConvertToPermanentToken($request);
-
-            if ($responseToken->AddCardTokenResult->Result === 0) {
-                $payment->setWebpayrecurringsaletokenid($responseToken->AddCardTokenResult->TokenId);
-                $payment->setWebpayistoken("yestoken");
-                $payment->save();
-                $order->save();
+                if ($responseToken->Result === 0) {
+                    $payment->setWebpayrecurringsaletokenid($responseToken->AddCardTokenResult->TokenId);
+                    $payment->setWebpayistoken("yestoken");
+                    $payment->save();
+                    $order->save();
+                }
+    
+                echo json_encode($responseToken);
             }
-
-            echo json_encode($responseToken->AddCardTokenResult);
         }
     }
 
